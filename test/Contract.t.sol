@@ -4,7 +4,6 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 
 import "src/Contract.sol";
-
 contract TestContract is Test {
     Contract c;
     event Transfer(address indexed from , address indexed to,uint value);// decleare a event .. enevts helps to connect with observer like node JS to observe a transaction  **up to 3 fields indexed
@@ -65,6 +64,29 @@ contract TestContract is Test {
         emit Approval(address(this),
         0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,10);
         c.approve(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, 10);
+    }
+    function test_Prank() public{
+        c.mint(address(this),100);
+        c.transfer(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4, 100);
+        vm.startPrank(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4);
+        c.transfer(address(this),10);
+        c.transfer(address(this),10);
+        c.transfer(address(this),10);
+        c.transfer(address(this),10);
+        c.transfer(address(this),60);
+        vm.stopPrank();//until this the address is mentioned one now revert back to the original address
+        assertEq(c.balanceOf(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4), 0 ,"ok");
+        assertEq(c.balanceOf(address(this)),100,"ok");
+
+    }
+    function testDealer() public{
+        vm.deal(address(this), 10 ether);// set the balance of this account to 10 ether 
+        assertEq(address(this).balance,10 ether);//check if this happend or not 
+    }
+    function testHox() public{
+        hoax(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4,100 ether);
+        c.test{value: 100 ether}();
+        assertEq(c.getBalance(),100 ether,"ok");
     }
     
 }
